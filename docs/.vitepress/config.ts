@@ -144,6 +144,18 @@ export default defineConfig({
             { text: '模型升级与灰度策略', link: '/guide/11-dev-process/model-iteration-playbook' },
           ],
         },
+        {
+          text: '12 — LLM 工程与微调教程',
+          items: [
+            { text: '教程总览', link: '/guide/12-llm-engineering/' },
+            { text: 'LLM 基础', link: '/guide/12-llm-engineering/01-llm-basics' },
+            { text: 'Token 与上下文窗口', link: '/guide/12-llm-engineering/02-token-tokenization-context' },
+            { text: 'Embedding 和语义搜索', link: '/guide/12-llm-engineering/03-embedding-semantic-search' },
+            { text: 'Transformer 和 Attention', link: '/guide/12-llm-engineering/04-transformer-attention' },
+            { text: '参数、训练和推理', link: '/guide/12-llm-engineering/05-parameters-training-inference' },
+            { text: '开源模型 vs 闭源模型', link: '/guide/12-llm-engineering/06-open-source-vs-closed-source' },
+          ],
+        },
       ],
     },
 
