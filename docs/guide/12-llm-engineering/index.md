@@ -72,28 +72,28 @@
 
 | 课程 | 核心问题 |
 |------|---------|
-| 第 7 课：SFT 数据集和指令微调 | 如何把模型教成“听指令的助手”？ |
-| 第 8 课：偏好数据、DPO 和 RLHF | 如何让模型回答更符合人的偏好？ |
-| 第 9 课：合成数据和数据清洗 | 为什么数据质量比数据数量更重要？ |
+| [第 7 课：SFT 数据集和指令微调](./07-sft-datasets-instruction-tuning) | 如何把模型教成"听指令的助手"？ |
+| [第 8 课：偏好数据、DPO 和 RLHF](./08-preference-data-dpo-rlhf) | 如何让模型回答更符合人的偏好？ |
+| [第 9 课：合成数据和数据清洗](./09-synthetic-data-data-curation) | 为什么数据质量比数据数量更重要？ |
 
 ### 第四部分：微调篇
 
 | 课程 | 核心问题 |
 |------|---------|
-| 第 10 课：Fine-tuning 基础 | 微调到底改变了什么？ |
-| 第 11 课：LoRA 和 Adapter Tuning | 如何低成本微调大模型？ |
-| 第 12 课：QLoRA 和 Quantization | 如何更省显存地训练和部署？ |
-| 第 13 课：Checkpoint、Adapter 和 GGUF | 模型文件为什么有这么多格式？ |
+| [第 10 课：Fine-tuning 基础](./10-fine-tuning-basics) | 微调到底改变了什么？ |
+| [第 11 课：LoRA 和 Adapter Tuning](./11-lora-adapter-tuning) | 如何低成本微调大模型？ |
+| [第 12 课：QLoRA 和 Quantization](./12-qlora-quantization) | 如何更省显存地训练和部署？ |
+| [第 13 课：Checkpoint、Adapter 和 GGUF](./13-checkpoint-adapter-gguf) | 模型文件为什么有这么多格式？ |
 
 ### 第五部分：RAG、Agent、部署与产品篇
 
 | 课程 | 核心问题 |
 |------|---------|
-| 第 14 课：RAG 基础 | 如何让模型基于你的资料回答？ |
-| 第 15 课：Tool Calling 和 Agent | 如何让模型不只回答，还能做事？ |
-| 第 16 课：推理优化和模型服务 | 如何让模型更快、更便宜、更稳定？ |
-| 第 17 课：本地 AI 生态 | Ollama、llama.cpp、vLLM 等工具怎么选？ |
-| 第 18 课：评估、成本和产品落地 | 如何判断一个 AI 功能是否值得上线？ |
+| [第 14 课：RAG 基础](./14-rag-basics) | 如何让模型基于你的资料回答？ |
+| [第 15 课：Tool Calling 和 Agent](./15-tool-calling-agent) | 如何让模型不只回答，还能做事？ |
+| [第 16 课：推理优化和模型服务](./16-inference-optimization-serving) | 如何让模型更快、更便宜、更稳定？ |
+| [第 17 课：本地 AI 生态](./17-local-ai-ecosystem) | Ollama、llama.cpp、vLLM 等工具怎么选？ |
+| [第 18 课：评估、成本和产品落地](./18-evaluation-costs-product) | 如何判断一个 AI 功能是否值得上线？ |
 
 ---
 
