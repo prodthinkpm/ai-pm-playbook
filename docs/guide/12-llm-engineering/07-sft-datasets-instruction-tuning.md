@@ -428,4 +428,6 @@ Hugging Face 上的 Alpaca 数据集
 
 ---
 
-*第 8 课即将推出：偏好数据、DPO 和 RLHF*
+## 下一课
+
+[第 8 课：偏好数据、DPO 和 RLHF](./08-preference-data-dpo-rlhf)

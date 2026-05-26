@@ -128,6 +128,17 @@
 | [参数、训练和推理](./12-llm-engineering/05-parameters-training-inference) | 参数、训练、推理、预训练、微调、生成参数 | 理解模型研发与产品方案选择 |
 | [开源模型 vs 闭源模型](./12-llm-engineering/06-open-source-vs-closed-source) | API 模型、本地模型、私有化、模型路由、TCO | 模型选型与架构决策 |
 | [SFT 数据集和指令微调](./12-llm-engineering/07-sft-datasets-instruction-tuning) | SFT、指令微调、数据集格式、数据质量 | 训练数据的准备和理解 |
+| [偏好数据、DPO 和 RLHF](./12-llm-engineering/08-preference-data-dpo-rlhf) | 偏好数据、DPO、RLHF、奖励模型 | 模型对齐与行为调优 |
+| [合成数据和数据清洗](./12-llm-engineering/09-synthetic-data-data-curation) | 合成数据、去重、质量评分、数据管道 | 企业级数据准备 |
+| [Fine-tuning 基础](./12-llm-engineering/10-fine-tuning-basics) | 超参数、loss 曲线、过拟合、灾难性遗忘 | 理解微调过程和原理 |
+| [LoRA 和 Adapter Tuning](./12-llm-engineering/11-lora-adapter-tuning) | LoRA、秩、Adapter、多 Adapter 组合 | 低成本微调的实战方法 |
+| [QLoRA 和量化](./12-llm-engineering/12-qlora-quantization) | QLoRA、NF4、GPTQ、AWQ、GGUF 量化 | 省显存训练和部署 |
+| [Checkpoint、Adapter 和 GGUF](./12-llm-engineering/13-checkpoint-adapter-gguf) | 检查点、格式转换、模型合并、GGUF | 模型文件管理和格式转换 |
+| [RAG 基础](./12-llm-engineering/14-rag-basics) | Chunking、向量数据库、重排序、混合搜索 | 构建基于文档的问答系统 |
+| [Tool Calling 和 Agent](./12-llm-engineering/15-tool-calling-agent) | 工具调用、ReAct、多 Agent、Agent 安全 | 让模型不仅能说还能做 |
+| [推理优化和模型服务](./12-llm-engineering/16-inference-optimization-serving) | KV Cache、Flash Attention、批推理、模型服务 | 让模型更快更省 |
+| [本地 AI 生态](./12-llm-engineering/17-local-ai-ecosystem) | Ollama、vLLM、Unsloth、Axolotl、TRL | 本地工具链全景 |
+| [评估、成本和产品落地](./12-llm-engineering/18-evaluation-costs-product) | Benchmark、成本分析、质量评估、产品思维 | 从模型到产品的最后一公里 |
 
 ---
 
