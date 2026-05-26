@@ -154,6 +154,7 @@ export default defineConfig({
             { text: 'Transformer 和 Attention', link: '/guide/12-llm-engineering/04-transformer-attention' },
             { text: '参数、训练和推理', link: '/guide/12-llm-engineering/05-parameters-training-inference' },
             { text: '开源模型 vs 闭源模型', link: '/guide/12-llm-engineering/06-open-source-vs-closed-source' },
+            { text: 'SFT 数据集和指令微调', link: '/guide/12-llm-engineering/07-sft-datasets-instruction-tuning' },
           ],
         },
       ],

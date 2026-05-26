@@ -127,6 +127,7 @@
 | [Transformer 和 Attention](./12-llm-engineering/04-transformer-attention) | Transformer、self-attention、多头注意力、长上下文成本 | 理解模型结构和上下文使用 |
 | [参数、训练和推理](./12-llm-engineering/05-parameters-training-inference) | 参数、训练、推理、预训练、微调、生成参数 | 理解模型研发与产品方案选择 |
 | [开源模型 vs 闭源模型](./12-llm-engineering/06-open-source-vs-closed-source) | API 模型、本地模型、私有化、模型路由、TCO | 模型选型与架构决策 |
+| [SFT 数据集和指令微调](./12-llm-engineering/07-sft-datasets-instruction-tuning) | SFT、指令微调、数据集格式、数据质量 | 训练数据的准备和理解 |
 
 ---
 
