@@ -22,6 +22,7 @@
 | 📊 **关注评估** | [Agent 评估指标](./docs/guide/04-evaluation/agent-evaluation-metrics.md) → [评估 Prompts](./docs/guide/07-prompts/evaluation-prompts.md) |
 | 📖 **看案例** | [案例研究](./docs/guide/03-cases/appsignal-case-study.md) → [PRD 模板](./docs/guide/02-prd/ai-saas-prd-template.md) |
 | 🧰 **想用 ChatGPT 做产品落地** | [ChatGPT Web 产品落地手册](./docs/guide/07-prompts/chatgpt-web-zero-to-one-product-playbook.md) → [从 0 到 1 全流程](./docs/guide/11-dev-process/product-lifecycle-guide.md) |
+| 🎓 **系统学习 LLM 工程** | [LLM 基础](./docs/guide/12-llm-engineering/01-llm-basics.md) → [Token 与上下文窗口](./docs/guide/12-llm-engineering/02-token-tokenization-context.md) → [全 18 课系列](./docs/guide/12-llm-engineering/) |
 | 💰 **要定价 / 控成本** | [AI 产品定价策略](./docs/guide/09-monetization/pricing-strategies.md) → [Token 经济学](./docs/guide/09-monetization/token-economics.md) |
 
 > 💡 **完整索引见 [`docs/guide/index.md`](./docs/guide/index.md)**
@@ -51,6 +52,7 @@
 | 09 商业化 | [定价策略](./docs/guide/09-monetization/pricing-strategies.md)、[Token 经济学](./docs/guide/09-monetization/token-economics.md)、[B 端 vs C 端](./docs/guide/09-monetization/b2b-vs-consumer.md) | 定价与成本 |
 | 10 安全合规 | [内容安全](./docs/guide/10-compliance/content-safety-framework.md)、[数据隐私](./docs/guide/10-compliance/privacy-compliance.md)、[审计透明度](./docs/guide/10-compliance/ai-audit-transparency.md)、[治理清单](./docs/guide/10-compliance/ai-governance-checklist.md) | 上线前审核 |
 | 11 开发流程 | [产品生命周期](./docs/guide/11-dev-process/product-lifecycle-guide.md)、[Prompt 管理](./docs/guide/11-dev-process/prompt-management.md)、[PM 与工程师协作](./docs/guide/11-dev-process/pm-mle-collaboration.md)、[模型升级灰度](./docs/guide/11-dev-process/model-iteration-playbook.md) | 迭代管理 |
+| 12 LLM 工程与微调教程 | 18 节课程从零到一覆盖 LLM 基础、微调、RAG、Agent、部署与评估，[从第 1 课开始](./docs/guide/12-llm-engineering/01-llm-basics.md) | AI PM 技术进阶 |
 
 ---
 
