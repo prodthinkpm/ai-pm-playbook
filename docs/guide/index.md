@@ -116,6 +116,18 @@
 | [PM 与工程师协作](./11-dev-process/pm-mle-collaboration) | 角色职责矩阵、决策权归属、冲突处理 | PM 和工程师怎么分工 |
 | [模型升级与灰度策略](./11-dev-process/model-iteration-playbook) | 灰度策略、影响评估、回滚机制、A/B 测试 | 模型升级怎么不翻车 |
 
+### 12 — LLM 工程与微调教程
+
+| 文件 | 核心内容 | 适用场景 |
+|------|---------|---------|
+| [LLM 工程与微调教程总览](./12-llm-engineering/) | 从基础到高级的 LLM 工程学习路线 | 系统学习 LLM 工程 |
+| [什么是 LLM？](./12-llm-engineering/01-llm-basics) | 大语言模型基础、参数、生成回答、能力边界 | 入门理解模型 |
+| [Token、Tokenization 和上下文窗口](./12-llm-engineering/02-token-tokenization-context) | token、切词、context window、成本和 Prompt 设计 | Prompt / 成本 / RAG 设计 |
+| [Embedding 和语义搜索](./12-llm-engineering/03-embedding-semantic-search) | embedding、向量数据库、语义搜索、RAG 检索基础 | 知识库 / RAG / AI 记忆 |
+| [Transformer 和 Attention](./12-llm-engineering/04-transformer-attention) | Transformer、self-attention、多头注意力、长上下文成本 | 理解模型结构和上下文使用 |
+| [参数、训练和推理](./12-llm-engineering/05-parameters-training-inference) | 参数、训练、推理、预训练、微调、生成参数 | 理解模型研发与产品方案选择 |
+| [开源模型 vs 闭源模型](./12-llm-engineering/06-open-source-vs-closed-source) | API 模型、本地模型、私有化、模型路由、TCO | 模型选型与架构决策 |
+
 ---
 
 ## 🔍 按场景搜索
@@ -123,6 +135,7 @@
 | 你在做什么 | 推荐阅读 |
 |-----------|---------|
 | **想用 ChatGPT 从 0 做产品** | ChatGPT Web 产品落地手册 → 从 0 到 1 全流程 → PRD Prompts |
+| **想系统学习 LLM 工程** | LLM 工程与微调教程总览 → 什么是 LLM → Token 与上下文窗口 → Embedding 和语义搜索 → Transformer 和 Attention → 参数、训练和推理 → 开源模型 vs 闭源模型 |
 | **接到一个新 AI 产品需求** | 需求验证 → 产品画布 → PRD 模板 → 评估指标 |
 | **要设计一个 Agent** | Agent 画布 → Agent 循环 → 记忆设计 → 权限审批 |
 | **要给模型做评测** | LLM 输出质量 → 工具调用评估 → 评估 Prompts |
