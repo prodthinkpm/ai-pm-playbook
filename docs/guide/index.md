@@ -12,7 +12,8 @@
 |------|---------|---------|
 | [AI产品经理研究与分析](./research/ai-pm-research-roadmap) | 10 个研究方向地图、3 个 P0 项目计划、工具链与合规清单 | 确定研究优先级、启动研究项目 |
 | [大模型与 Harness 的未来轨迹](./research/llm-harness-future-trajectory) | 三层 harness 分类、BigModel vs BigHarness 争论裁决、混合架构方案与行动建议 | 理解 agent 运行时趋势、制定技术战略 |
-| [Harness Engineering 入门](./research/harness-engineering-introduction) | Harness 六大核心组件、OpenAI Codex 案例、LangChain 数据验证、最小可行落地三步法 | 全面理解 Harness Engineering 范式、评估 Agent 产品成熟度 |
+|| [Harness Engineering 入门](./research/harness-engineering-introduction) | Harness 六大核心组件、OpenAI Codex 案例、LangChain 数据验证、最小可行落地三步法 | 全面理解 Harness Engineering 范式、评估 Agent 产品成熟度 |
+|| [Loop Engineering 入门](./research/loop-engineering-introduction) | Agent Loop 七要素、七层设计框架、四种典型场景、六种风险、评估指标、落地路径、Canvas 模板 | 设计 Agent 工作循环、评估 Agent 持续执行方案 |
 
 ### 01 — AI 产品框架
 
