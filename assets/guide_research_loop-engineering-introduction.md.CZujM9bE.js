@@ -1,0 +1,452 @@
+import{_ as a,o as n,c as p,ag as t}from"./chunks/framework.i8sMDeRW.js";const g=JSON.parse('{"title":"Loop Engineering：AI Agent 时代，从写 Prompt 到设计工作循环","description":"","frontmatter":{},"headers":[],"relativePath":"guide/research/loop-engineering-introduction.md","filePath":"guide/research/loop-engineering-introduction.md","lastUpdated":1782288443000}'),e={name:"guide/research/loop-engineering-introduction.md"};function i(l,s,o,d,h,r){return n(),p("div",null,[...s[0]||(s[0]=[t(`<h1 id="loop-engineering-ai-agent-时代-从写-prompt-到设计工作循环" tabindex="-1">Loop Engineering：AI Agent 时代，从写 Prompt 到设计工作循环 <a class="header-anchor" href="#loop-engineering-ai-agent-时代-从写-prompt-到设计工作循环" aria-label="Permalink to &quot;Loop Engineering：AI Agent 时代，从写 Prompt 到设计工作循环&quot;">​</a></h1><blockquote><p><strong>本文发布于 2026-06</strong>：当 AI Agent 不再只是回答问题，而是开始持续执行任务、调用工具、审查结果并自我修正时，产品经理需要关注的不只是 Prompt、Context 或 Harness，而是一个更产品化的问题：如何设计 Agent 的工作循环。本文面向 AI PM，系统解释 Loop Engineering 的定义、核心组件、产品设计方法、风险边界、评估指标与落地模板。</p></blockquote><hr><h2 id="执行摘要" tabindex="-1">执行摘要 <a class="header-anchor" href="#执行摘要" aria-label="Permalink to &quot;执行摘要&quot;">​</a></h2><p>过去几年，AI 产品方法论经历了几次明显演进：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Prompt Engineering → Context Engineering → Harness Engineering → Loop Engineering</span></span></code></pre></div><p>如果说：</p><ul><li><strong>Prompt Engineering</strong> 关注&quot;怎么问模型&quot;；</li><li><strong>Context Engineering</strong> 关注&quot;给模型什么信息&quot;；</li><li><strong>Harness Engineering</strong> 关注&quot;给 Agent 什么运行环境&quot;；</li><li>那么 <strong>Loop Engineering</strong> 关注的是：<strong>如何让 Agent 在一个可控循环中持续推进任务、检查结果、吸收反馈，并在正确的时候停止。</strong></li></ul><p>一句话定义：</p><blockquote><p><strong>Loop Engineering 是为 AI Agent 设计可重复、可验证、可中止的工作循环。</strong></p></blockquote><p>它不等于&quot;让 Agent 一直自动跑&quot;。真正成熟的 Loop Engineering 不是追求无人值守，而是设计清楚：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>什么时候启动？</span></span>
+<span class="line"><span>本轮目标是什么？</span></span>
+<span class="line"><span>需要加载哪些上下文？</span></span>
+<span class="line"><span>可以调用哪些工具？</span></span>
+<span class="line"><span>谁来验证结果？</span></span>
+<span class="line"><span>失败后如何反馈？</span></span>
+<span class="line"><span>什么时候继续？</span></span>
+<span class="line"><span>什么时候停止？</span></span>
+<span class="line"><span>什么时候必须交给人？</span></span></code></pre></div><p>对于 AI PM 而言，Loop Engineering 的意义是：<strong>把产品经理擅长的流程设计、验收标准、反馈闭环、风险控制和资源约束，转化为 Agent 可以执行的工作系统。</strong></p><hr><h2 id="一、为什么现在开始讲-loop-engineering" tabindex="-1">一、为什么现在开始讲 Loop Engineering <a class="header-anchor" href="#一、为什么现在开始讲-loop-engineering" aria-label="Permalink to &quot;一、为什么现在开始讲 Loop Engineering&quot;">​</a></h2><p>早期使用大模型，产品团队主要关注单次输出：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>写一段文案</span></span>
+<span class="line"><span>生成一份 PRD</span></span>
+<span class="line"><span>总结一份文档</span></span>
+<span class="line"><span>回答一个问题</span></span></code></pre></div><p>这时 Prompt Engineering 很重要。</p><p>后来，大家发现单次 Prompt 不够，模型需要更多背景信息：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>历史对话</span></span>
+<span class="line"><span>知识库</span></span>
+<span class="line"><span>用户画像</span></span>
+<span class="line"><span>项目文档</span></span>
+<span class="line"><span>代码库</span></span>
+<span class="line"><span>工具返回结果</span></span></code></pre></div><p>于是 Context Engineering 和 RAG 成为重点。</p><p>再后来，AI Agent 开始调用工具、执行代码、读写文件、提交 PR、调用 API。团队发现，模型本身不是全部问题，Agent 还需要：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>工具</span></span>
+<span class="line"><span>权限</span></span>
+<span class="line"><span>沙箱</span></span>
+<span class="line"><span>记忆</span></span>
+<span class="line"><span>上下文压缩</span></span>
+<span class="line"><span>任务编排</span></span>
+<span class="line"><span>验证过滤</span></span>
+<span class="line"><span>审计日志</span></span>
+<span class="line"><span>自我修正</span></span></code></pre></div><p>这就是 Harness Engineering 的关注范围。</p><p>但当 Agent 从&quot;一次任务&quot;变成&quot;持续任务&quot;，新的问题出现了：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Agent 要不要继续下一步？</span></span>
+<span class="line"><span>失败后要不要重试？</span></span>
+<span class="line"><span>重试几次？</span></span>
+<span class="line"><span>谁来 review？</span></span>
+<span class="line"><span>review 后如何修正？</span></span>
+<span class="line"><span>成本超了怎么办？</span></span>
+<span class="line"><span>方向错了什么时候停？</span></span>
+<span class="line"><span>多个 Agent 之间如何接力？</span></span></code></pre></div><p>这些问题不只是 Harness 的组件问题，而是 <strong>Loop 的产品设计问题</strong>。</p><p>因此，Loop Engineering 可以理解为 Harness Engineering 之后更贴近产品运行的一层：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Harness Engineering = 让 Agent 有能力工作</span></span>
+<span class="line"><span>Loop Engineering = 让 Agent 按正确节奏持续工作</span></span></code></pre></div><hr><h2 id="二、prompt、workflow、harness、loop-的区别" tabindex="-1">二、Prompt、Workflow、Harness、Loop 的区别 <a class="header-anchor" href="#二、prompt、workflow、harness、loop-的区别" aria-label="Permalink to &quot;二、Prompt、Workflow、Harness、Loop 的区别&quot;">​</a></h2><table tabindex="0"><thead><tr><th>概念</th><th>核心问题</th><th>典型产物</th><th>PM 关注点</th></tr></thead><tbody><tr><td>Prompt Engineering</td><td>怎么让模型这次答得更好</td><td>Prompt 模板、示例、输出格式</td><td>单次输出质量</td></tr><tr><td>Context Engineering</td><td>给模型什么信息</td><td>RAG、上下文窗口、记忆、文档片段</td><td>信息质量和上下文相关性</td></tr><tr><td>Workflow Engineering</td><td>任务流程怎么拆</td><td>流程图、DAG、自动化步骤</td><td>业务流程自动化</td></tr><tr><td>Harness Engineering</td><td>Agent 在什么环境中做事</td><td>工具、权限、沙箱、验证、可观测性</td><td>Agent 运行环境</td></tr><tr><td><strong>Loop Engineering</strong></td><td>Agent 如何持续推进、检查、修正和停止</td><td>Trigger、Goal、Action、Review、Feedback、Stop Condition</td><td>持续执行闭环</td></tr></tbody></table><p>Loop 和 Workflow 的区别尤其重要。</p><p>Workflow 更像：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>A → B → C → D</span></span></code></pre></div><p>Loop 更像：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>目标 → 执行 → 检查 → 反馈 → 修正 → 再执行 → 停止</span></span></code></pre></div><p>Workflow 偏确定流程。Loop 偏不确定任务。</p><p>因此，Loop 更适合 AI Agent，因为 Agent 处理的大多数任务都不是一次性线性流程，而是需要不断探索、验证和修正。</p><hr><h2 id="三、什么是一个-agent-loop" tabindex="-1">三、什么是一个 Agent Loop <a class="header-anchor" href="#三、什么是一个-agent-loop" aria-label="Permalink to &quot;三、什么是一个 Agent Loop&quot;">​</a></h2><p>一个最小 Agent Loop 可以写成：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Trigger → Goal → Context → Action → Verification → Feedback → Stop</span></span></code></pre></div><p>也可以写成产品公式：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Loop = Trigger + Goal + Context + Action + Verification + Feedback + Stop Condition</span></span></code></pre></div><h3 id="_3-1-trigger-循环如何启动" tabindex="-1">3.1 Trigger：循环如何启动 <a class="header-anchor" href="#_3-1-trigger-循环如何启动" aria-label="Permalink to &quot;3.1 Trigger：循环如何启动&quot;">​</a></h3><p>Trigger 决定 Agent 什么时候开始工作。</p><table tabindex="0"><thead><tr><th>类型</th><th>示例</th><th>适用场景</th></tr></thead><tbody><tr><td>手动触发</td><td>用户点击&quot;开始分析&quot;</td><td>高风险任务、用户主动任务</td></tr><tr><td>定时触发</td><td>每天 9 点检查竞品更新</td><td>监控、日报、周期复盘</td></tr><tr><td>事件触发</td><td>新 Issue、新用户反馈、新日志异常</td><td>工程、客服、运营</td></tr><tr><td>阈值触发</td><td>负面反馈率超过 5%</td><td>风险预警、指标监控</td></tr><tr><td>上游 Agent 触发</td><td>Review Agent 要求修复</td><td>多 Agent 协作</td></tr></tbody></table><p>PM 要定义的不是&quot;能不能自动触发&quot;，而是：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>什么事情值得触发？</span></span>
+<span class="line"><span>触发频率是多少？</span></span>
+<span class="line"><span>重复触发如何去重？</span></span>
+<span class="line"><span>触发后是否需要用户确认？</span></span></code></pre></div><h3 id="_3-2-goal-本轮循环的目标是什么" tabindex="-1">3.2 Goal：本轮循环的目标是什么 <a class="header-anchor" href="#_3-2-goal-本轮循环的目标是什么" aria-label="Permalink to &quot;3.2 Goal：本轮循环的目标是什么&quot;">​</a></h3><p>没有清晰目标的 Loop 很容易变成&quot;Agent 自嗨&quot;。</p><p>坏目标：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>优化这个项目</span></span>
+<span class="line"><span>改进用户体验</span></span>
+<span class="line"><span>帮我看看有没有问题</span></span></code></pre></div><p>好目标：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>检查 docs/guide/07-prompts 下的新文章是否已加入 sidebar、guide index 和 README。</span></span>
+<span class="line"><span>如果缺失，请补齐导航入口；不要修改无关文件。</span></span></code></pre></div><p>一个好的 Loop Goal 应该包含：</p><table tabindex="0"><thead><tr><th>要素</th><th>示例</th></tr></thead><tbody><tr><td>任务对象</td><td>某个 PRD、某个页面、某个代码目录</td></tr><tr><td>成功标准</td><td>构建通过、测试通过、指标达标</td></tr><tr><td>约束范围</td><td>不改无关文件、不改接口、不改数据库</td></tr><tr><td>输出格式</td><td>PR、报告、表格、Checklist</td></tr><tr><td>风险边界</td><td>高风险动作需人工确认</td></tr></tbody></table><h3 id="_3-3-context-每轮循环应该加载什么信息" tabindex="-1">3.3 Context：每轮循环应该加载什么信息 <a class="header-anchor" href="#_3-3-context-每轮循环应该加载什么信息" aria-label="Permalink to &quot;3.3 Context：每轮循环应该加载什么信息&quot;">​</a></h3><p>Agent 每一轮执行都需要上下文，但上下文不是越多越好。</p><p>Loop 中的上下文通常包括：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>项目目标</span></span>
+<span class="line"><span>当前任务</span></span>
+<span class="line"><span>历史决策</span></span>
+<span class="line"><span>相关文件</span></span>
+<span class="line"><span>工具说明</span></span>
+<span class="line"><span>代码结构</span></span>
+<span class="line"><span>产品规范</span></span>
+<span class="line"><span>用户反馈</span></span>
+<span class="line"><span>失败记录</span></span>
+<span class="line"><span>验收标准</span></span></code></pre></div><p>PM 要关注两个问题：</p><ol><li><strong>上下文是否足够？</strong></li><li><strong>上下文是否太多、太旧、太乱？</strong></li></ol><p>推荐做法：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>核心规则常驻</span></span>
+<span class="line"><span>任务相关文档按需加载</span></span>
+<span class="line"><span>历史失败样例摘要化</span></span>
+<span class="line"><span>大文件只传摘要和路径</span></span>
+<span class="line"><span>工具结果不直接当作系统指令</span></span></code></pre></div><p>如果上下文管理不好，Loop 会出现&quot;越跑越糊&quot;的问题：前几轮还正常，后几轮开始忘记目标、重复操作、误解旧信息。</p><h3 id="_3-4-action-agent-可以做什么" tabindex="-1">3.4 Action：Agent 可以做什么 <a class="header-anchor" href="#_3-4-action-agent-可以做什么" aria-label="Permalink to &quot;3.4 Action：Agent 可以做什么&quot;">​</a></h3><p>Loop 中的 Action 不只是&quot;生成文本&quot;，还可能包括：</p><table tabindex="0"><thead><tr><th>动作类型</th><th>示例</th><th>风险</th></tr></thead><tbody><tr><td>读取</td><td>读文档、读代码、查数据</td><td>低到中</td></tr><tr><td>生成</td><td>写文案、写 PRD、生成测试用例</td><td>中</td></tr><tr><td>修改</td><td>改文档、改代码、改配置</td><td>中到高</td></tr><tr><td>调用工具</td><td>搜索、运行脚本、调用 API</td><td>中到高</td></tr><tr><td>外部发送</td><td>发邮件、提交 PR、发通知</td><td>高</td></tr><tr><td>不可逆操作</td><td>删除数据、生产发布、付款</td><td>极高</td></tr></tbody></table><p>PM 必须定义动作边界：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Agent 可以读什么？</span></span>
+<span class="line"><span>可以写什么？</span></span>
+<span class="line"><span>可以调用什么工具？</span></span>
+<span class="line"><span>哪些动作需要审批？</span></span>
+<span class="line"><span>哪些动作默认禁止？</span></span></code></pre></div><h3 id="_3-5-verification-谁来检查结果" tabindex="-1">3.5 Verification：谁来检查结果 <a class="header-anchor" href="#_3-5-verification-谁来检查结果" aria-label="Permalink to &quot;3.5 Verification：谁来检查结果&quot;">​</a></h3><p>Loop Engineering 的核心不是让 Agent 做得更多，而是让每一步都有验证。</p><p>验证可以分为五类：</p><table tabindex="0"><thead><tr><th>验证方式</th><th>示例</th></tr></thead><tbody><tr><td>规则验证</td><td>Lint、schema、链接检查、格式检查</td></tr><tr><td>测试验证</td><td>单元测试、集成测试、构建测试</td></tr><tr><td>模型验证</td><td>Review Agent、Judge Prompt、红队 Agent</td></tr><tr><td>人工验证</td><td>PM、工程师、法务、运营审核</td></tr><tr><td>数据验证</td><td>指标是否改善、用户反馈是否变好</td></tr></tbody></table><p>在产品文档场景里，验证可以是：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>新增文章是否放对目录？</span></span>
+<span class="line"><span>sidebar 是否加入？</span></span>
+<span class="line"><span>guide index 是否加入？</span></span>
+<span class="line"><span>README 是否加入？</span></span>
+<span class="line"><span>内部链接是否正确？</span></span>
+<span class="line"><span>标题风格是否一致？</span></span>
+<span class="line"><span>是否包含参考来源？</span></span></code></pre></div><p>在 Coding Agent 场景里，验证可以是：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>测试是否通过？</span></span>
+<span class="line"><span>类型检查是否通过？</span></span>
+<span class="line"><span>是否改了无关文件？</span></span>
+<span class="line"><span>是否符合架构边界？</span></span>
+<span class="line"><span>是否有安全风险？</span></span></code></pre></div><h3 id="_3-6-feedback-失败后如何修正" tabindex="-1">3.6 Feedback：失败后如何修正 <a class="header-anchor" href="#_3-6-feedback-失败后如何修正" aria-label="Permalink to &quot;3.6 Feedback：失败后如何修正&quot;">​</a></h3><p>没有 Feedback 的 Loop 只是重复执行。</p><p>一个好的反馈机制应该告诉 Agent：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>哪里失败？</span></span>
+<span class="line"><span>为什么失败？</span></span>
+<span class="line"><span>下轮应该改什么？</span></span>
+<span class="line"><span>哪些方向不要再试？</span></span>
+<span class="line"><span>是否需要升级人工？</span></span></code></pre></div><p>反馈可以来自：</p><ul><li>测试失败日志；</li><li>Review Agent 评论；</li><li>用户反馈；</li><li>PM 修改意见；</li><li>线上指标；</li><li>安全扫描；</li><li>成本告警。</li></ul><p>PM 要避免模糊反馈：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>写得不够好</span></span>
+<span class="line"><span>再优化一下</span></span>
+<span class="line"><span>感觉不对</span></span></code></pre></div><p>更好的反馈是：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>PRD 的验收标准不可测试。请把&quot;体验流畅&quot;改成 Given / When / Then 格式，并补充失败状态。</span></span></code></pre></div><h3 id="_3-7-stop-condition-什么时候停止" tabindex="-1">3.7 Stop Condition：什么时候停止 <a class="header-anchor" href="#_3-7-stop-condition-什么时候停止" aria-label="Permalink to &quot;3.7 Stop Condition：什么时候停止&quot;">​</a></h3><p>Stop Condition 是 Loop Engineering 最容易被忽略，但最重要的部分。</p><p>如果没有停止条件，Agent 可能会：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>无限重试</span></span>
+<span class="line"><span>重复修改</span></span>
+<span class="line"><span>越改越偏</span></span>
+<span class="line"><span>消耗大量 token</span></span>
+<span class="line"><span>为了通过测试而破坏原始需求</span></span></code></pre></div><p>常见停止条件：</p><table tabindex="0"><thead><tr><th>类型</th><th>示例</th></tr></thead><tbody><tr><td>成功停止</td><td>所有测试通过，PR 创建完成</td></tr><tr><td>失败停止</td><td>连续失败 3 次</td></tr><tr><td>时间停止</td><td>运行超过 30 分钟</td></tr><tr><td>成本停止</td><td>消耗超过 50 credits</td></tr><tr><td>风险停止</td><td>需要删除数据、修改生产配置</td></tr><tr><td>不确定停止</td><td>置信度低于阈值</td></tr><tr><td>人工停止</td><td>等待 PM 或工程师确认</td></tr></tbody></table><p>PM 应该明确写出：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>最多执行几轮？</span></span>
+<span class="line"><span>每轮最多花多少钱？</span></span>
+<span class="line"><span>失败几次后停止？</span></span>
+<span class="line"><span>哪些动作必须等待人类？</span></span>
+<span class="line"><span>什么时候输出报告而不是继续执行？</span></span></code></pre></div><hr><h2 id="四、loop-engineering-的七层设计框架" tabindex="-1">四、Loop Engineering 的七层设计框架 <a class="header-anchor" href="#四、loop-engineering-的七层设计框架" aria-label="Permalink to &quot;四、Loop Engineering 的七层设计框架&quot;">​</a></h2><p>可以把 Loop Engineering 拆成七层：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>目标层 → 触发层 → 上下文层 → 工具层 → 验证层 → 反馈层 → 治理层</span></span></code></pre></div><table tabindex="0"><thead><tr><th>层级</th><th>设计问题</th><th>PM 产出物</th></tr></thead><tbody><tr><td>目标层</td><td>本循环解决什么问题？</td><td>Loop Goal、成功标准</td></tr><tr><td>触发层</td><td>什么时候启动？</td><td>Trigger 规则</td></tr><tr><td>上下文层</td><td>每轮需要什么信息？</td><td>Context Policy</td></tr><tr><td>工具层</td><td>Agent 能做什么？</td><td>Tool Permission Matrix</td></tr><tr><td>验证层</td><td>如何判断做得对？</td><td>Eval Checklist</td></tr><tr><td>反馈层</td><td>错了如何修正？</td><td>Feedback Rules</td></tr><tr><td>治理层</td><td>成本、安全、权限如何控制？</td><td>Budget、Approval、Audit</td></tr></tbody></table><p>这七层里，最有 PM 价值的是：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>目标层</span></span>
+<span class="line"><span>验证层</span></span>
+<span class="line"><span>反馈层</span></span>
+<span class="line"><span>治理层</span></span></code></pre></div><p>因为这些决定了 Agent 不是&quot;能做事&quot;，而是&quot;做正确的事&quot;。</p><hr><h2 id="五、产品经理如何设计-loop" tabindex="-1">五、产品经理如何设计 Loop <a class="header-anchor" href="#五、产品经理如何设计-loop" aria-label="Permalink to &quot;五、产品经理如何设计 Loop&quot;">​</a></h2><p>AI PM 可以把 Loop 设计成一个 Canvas。</p><h3 id="loop-design-canvas" tabindex="-1">Loop Design Canvas <a class="header-anchor" href="#loop-design-canvas" aria-label="Permalink to &quot;Loop Design Canvas&quot;">​</a></h3><table tabindex="0"><thead><tr><th>模块</th><th>关键问题</th><th>示例</th></tr></thead><tbody><tr><td>Loop 名称</td><td>这个循环叫什么？</td><td>PRD Review Loop</td></tr><tr><td>用户 / 负责人</td><td>谁使用？谁负责？</td><td>PM、Tech Lead</td></tr><tr><td>触发条件</td><td>什么时候启动？</td><td>PRD v0.1 完成后</td></tr><tr><td>目标</td><td>本轮要完成什么？</td><td>检查需求完整性和可测试性</td></tr><tr><td>输入</td><td>需要哪些材料？</td><td>PRD、用户故事、业务目标</td></tr><tr><td>上下文</td><td>需要加载哪些规则？</td><td>PRD 模板、验收标准规范</td></tr><tr><td>工具</td><td>可以调用哪些工具？</td><td>文档编辑、评论、链接检查</td></tr><tr><td>执行动作</td><td>Agent 做什么？</td><td>找缺失项、提出修改建议</td></tr><tr><td>验证方式</td><td>怎么判断结果有效？</td><td>Checklist 全部通过</td></tr><tr><td>反馈机制</td><td>失败后怎么办？</td><td>生成修改清单，等待 PM 确认</td></tr><tr><td>停止条件</td><td>何时结束？</td><td>P0 缺陷清零或人工终止</td></tr><tr><td>成本上限</td><td>最多执行多少轮？</td><td>最多 3 轮</td></tr><tr><td>风险边界</td><td>哪些不能自动做？</td><td>不改核心需求，不删内容</td></tr></tbody></table><h3 id="推荐模板" tabindex="-1">推荐模板 <a class="header-anchor" href="#推荐模板" aria-label="Permalink to &quot;推荐模板&quot;">​</a></h3><div class="language-markdown vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">markdown</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;"># Loop Design Canvas</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;">## 1. Loop Name</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;">## 2. Owner</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;">## 3. Trigger</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;">## 4. Goal</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;">## 5. Inputs</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;">## 6. Context Policy</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;">## 7. Tools and Permissions</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;">## 8. Action Steps</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;">## 9. Verification</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;">## 10. Feedback Rules</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;">## 11. Stop Conditions</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;">## 12. Budget</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;">## 13. Risks and Human Approval</span></span></code></pre></div><hr><h2 id="六、典型场景一-coding-agent-loop" tabindex="-1">六、典型场景一：Coding Agent Loop <a class="header-anchor" href="#六、典型场景一-coding-agent-loop" aria-label="Permalink to &quot;六、典型场景一：Coding Agent Loop&quot;">​</a></h2><p>Coding Agent 是 Loop Engineering 最典型的应用场景。</p><p>一个成熟的 Coding Agent Loop 可能是：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Issue / 需求 → 读取代码 → 制定计划 → 修改代码</span></span>
+<span class="line"><span>→ 运行测试 → 自我 Review → 修复问题</span></span>
+<span class="line"><span>→ 独立 Review Agent 检查 → 创建 PR → 人类 Review</span></span></code></pre></div><h3 id="示例-代码修复-loop" tabindex="-1">示例：代码修复 Loop <a class="header-anchor" href="#示例-代码修复-loop" aria-label="Permalink to &quot;示例：代码修复 Loop&quot;">​</a></h3><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Trigger:</span></span>
+<span class="line"><span>- GitHub Issue 被标记为 agent-ready</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Goal:</span></span>
+<span class="line"><span>- 修复 Issue 中描述的 bug，不改变无关功能</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Context:</span></span>
+<span class="line"><span>- Issue 描述</span></span>
+<span class="line"><span>- 相关代码文件</span></span>
+<span class="line"><span>- 测试目录</span></span>
+<span class="line"><span>- AGENTS.md</span></span>
+<span class="line"><span>- 架构约束</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Actions:</span></span>
+<span class="line"><span>- 定位问题</span></span>
+<span class="line"><span>- 修改最小必要代码</span></span>
+<span class="line"><span>- 新增或更新测试</span></span>
+<span class="line"><span>- 运行测试</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Verification:</span></span>
+<span class="line"><span>- 单元测试通过</span></span>
+<span class="line"><span>- 类型检查通过</span></span>
+<span class="line"><span>- 没有修改无关文件</span></span>
+<span class="line"><span>- Review Agent 通过</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Feedback:</span></span>
+<span class="line"><span>- 测试失败则读取错误并重试</span></span>
+<span class="line"><span>- 连续失败 3 次则停止并输出诊断报告</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Stop:</span></span>
+<span class="line"><span>- PR 创建完成</span></span>
+<span class="line"><span>- 或连续失败 3 次</span></span>
+<span class="line"><span>- 或需要高风险修改</span></span></code></pre></div><h3 id="pm-要关注什么" tabindex="-1">PM 要关注什么 <a class="header-anchor" href="#pm-要关注什么" aria-label="Permalink to &quot;PM 要关注什么&quot;">​</a></h3><p>PM 不需要写代码，但要定义：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>什么叫修好了？</span></span>
+<span class="line"><span>哪些行为不能做？</span></span>
+<span class="line"><span>是否可以改接口？</span></span>
+<span class="line"><span>是否可以改数据库？</span></span>
+<span class="line"><span>是否需要兼容老用户？</span></span>
+<span class="line"><span>失败后是否继续？</span></span></code></pre></div><p>如果 PM 不定义这些，Agent 可能会为了让测试通过而牺牲产品意图。</p><hr><h2 id="七、典型场景二-prd-review-loop" tabindex="-1">七、典型场景二：PRD Review Loop <a class="header-anchor" href="#七、典型场景二-prd-review-loop" aria-label="Permalink to &quot;七、典型场景二：PRD Review Loop&quot;">​</a></h2><p>这是 AI PM 最容易落地的 Loop。</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>PRD 草稿 → Agent 检查 → 输出缺失项 → PM 修改</span></span>
+<span class="line"><span>→ Agent 二次检查 → 形成评审版 → 进入需求评审</span></span></code></pre></div><h3 id="prd-review-loop-规则" tabindex="-1">PRD Review Loop 规则 <a class="header-anchor" href="#prd-review-loop-规则" aria-label="Permalink to &quot;PRD Review Loop 规则&quot;">​</a></h3><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Trigger:</span></span>
+<span class="line"><span>- PRD v0.1 完成</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Goal:</span></span>
+<span class="line"><span>- 检查 PRD 是否达到评审标准</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Context:</span></span>
+<span class="line"><span>- PRD 模板</span></span>
+<span class="line"><span>- 产品目标</span></span>
+<span class="line"><span>- 用户画像</span></span>
+<span class="line"><span>- 业务约束</span></span>
+<span class="line"><span>- AI 功能评估规范</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Verification:</span></span>
+<span class="line"><span>- 是否有目标用户</span></span>
+<span class="line"><span>- 是否有核心场景</span></span>
+<span class="line"><span>- 是否有用户故事</span></span>
+<span class="line"><span>- 是否有主流程和异常流程</span></span>
+<span class="line"><span>- 是否有可测试验收标准</span></span>
+<span class="line"><span>- 是否有埋点</span></span>
+<span class="line"><span>- 是否有权限规则</span></span>
+<span class="line"><span>- 是否有 AI 评估和兜底</span></span>
+<span class="line"><span>- 是否有上线风险</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Stop:</span></span>
+<span class="line"><span>- P0 缺失项清零</span></span>
+<span class="line"><span>- 或 PM 选择进入评审</span></span></code></pre></div><h3 id="agent-输出示例" tabindex="-1">Agent 输出示例 <a class="header-anchor" href="#agent-输出示例" aria-label="Permalink to &quot;Agent 输出示例&quot;">​</a></h3><table tabindex="0"><thead><tr><th>问题</th><th>严重程度</th><th>说明</th><th>建议</th></tr></thead><tbody><tr><td>缺少失败兜底</td><td>P0</td><td>AI 生成失败时未定义用户看到什么</td><td>补充超时、无结果、低置信度状态</td></tr><tr><td>验收标准不可测试</td><td>P0</td><td>&quot;体验流畅&quot;无法验收</td><td>改成 Given / When / Then</td></tr><tr><td>成本指标缺失</td><td>P1</td><td>未定义单次任务成本</td><td>增加 cost per task 和月度预算</td></tr></tbody></table><hr><h2 id="八、典型场景三-用户反馈归因-loop" tabindex="-1">八、典型场景三：用户反馈归因 Loop <a class="header-anchor" href="#八、典型场景三-用户反馈归因-loop" aria-label="Permalink to &quot;八、典型场景三：用户反馈归因 Loop&quot;">​</a></h2><p>AI 产品上线后，用户反馈很分散：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>点赞 / 点踩</span></span>
+<span class="line"><span>客服工单</span></span>
+<span class="line"><span>社群吐槽</span></span>
+<span class="line"><span>NPS</span></span>
+<span class="line"><span>用户访谈</span></span>
+<span class="line"><span>埋点数据</span></span></code></pre></div><p>可以设计一个 Feedback Loop：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>收集反馈 → 聚类 → 归因 → 匹配功能 / 模型 / Prompt / 数据问题</span></span>
+<span class="line"><span>→ 生成迭代建议 → 加入评估集 → 复盘</span></span></code></pre></div><h3 id="用户反馈-loop" tabindex="-1">用户反馈 Loop <a class="header-anchor" href="#用户反馈-loop" aria-label="Permalink to &quot;用户反馈 Loop&quot;">​</a></h3><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Trigger:</span></span>
+<span class="line"><span>- 每天早上 9 点</span></span>
+<span class="line"><span>- 或负面反馈超过阈值</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Goal:</span></span>
+<span class="line"><span>- 找出过去 24 小时 AI 功能的主要失败模式</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Input:</span></span>
+<span class="line"><span>- 点踩记录</span></span>
+<span class="line"><span>- 用户原始问题</span></span>
+<span class="line"><span>- AI 输出</span></span>
+<span class="line"><span>- 工具调用 trace</span></span>
+<span class="line"><span>- 客服工单</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Action:</span></span>
+<span class="line"><span>- 聚类问题</span></span>
+<span class="line"><span>- 判断失败类型</span></span>
+<span class="line"><span>- 标记是否进入评估集</span></span>
+<span class="line"><span>- 生成修复建议</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Verification:</span></span>
+<span class="line"><span>- 每类问题有代表样例</span></span>
+<span class="line"><span>- 每条建议有负责人</span></span>
+<span class="line"><span>- 高风险问题单独标记</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Stop:</span></span>
+<span class="line"><span>- 输出日报</span></span>
+<span class="line"><span>- 高风险问题升级人工</span></span></code></pre></div><h3 id="失败类型" tabindex="-1">失败类型 <a class="header-anchor" href="#失败类型" aria-label="Permalink to &quot;失败类型&quot;">​</a></h3><table tabindex="0"><thead><tr><th>类型</th><th>说明</th></tr></thead><tbody><tr><td>需求理解错误</td><td>模型没理解用户目标</td></tr><tr><td>检索失败</td><td>RAG 没找到正确资料</td></tr><tr><td>引用错误</td><td>引用不支持答案</td></tr><tr><td>工具失败</td><td>API、搜索、数据库调用失败</td></tr><tr><td>格式失败</td><td>输出不符合 schema</td></tr><tr><td>安全问题</td><td>不该回答却回答了</td></tr><tr><td>体验问题</td><td>太长、太慢、太复杂</td></tr></tbody></table><hr><h2 id="九、典型场景四-文档发布-loop" tabindex="-1">九、典型场景四：文档发布 Loop <a class="header-anchor" href="#九、典型场景四-文档发布-loop" aria-label="Permalink to &quot;九、典型场景四：文档发布 Loop&quot;">​</a></h2><p>对于 AI PM Playbook 这类文档仓库，非常适合设计文档发布 Loop。</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>新文章 → 分类 → 创建文件 → 更新 sidebar</span></span>
+<span class="line"><span>→ 更新 guide index → 更新 README / homepage</span></span>
+<span class="line"><span>→ 检查链接 → 创建 PR</span></span></code></pre></div><h3 id="文档发布-loop" tabindex="-1">文档发布 Loop <a class="header-anchor" href="#文档发布-loop" aria-label="Permalink to &quot;文档发布 Loop&quot;">​</a></h3><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Trigger:</span></span>
+<span class="line"><span>- 用户提供一篇新文章</span></span>
+<span class="line"><span>- 或要求新增一个主题</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Goal:</span></span>
+<span class="line"><span>- 把文章发布为可导航、可检索、可 review 的站点文档</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Context:</span></span>
+<span class="line"><span>- 仓库目录结构</span></span>
+<span class="line"><span>- VitePress sidebar 配置</span></span>
+<span class="line"><span>- README 入口规则</span></span>
+<span class="line"><span>- 总索引格式</span></span>
+<span class="line"><span>- 现有同类文章风格</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Action:</span></span>
+<span class="line"><span>- 判断文章所属模块</span></span>
+<span class="line"><span>- 创建 Markdown 文件</span></span>
+<span class="line"><span>- 更新 docs/.vitepress/config.ts</span></span>
+<span class="line"><span>- 更新 docs/guide/index.md</span></span>
+<span class="line"><span>- 必要时更新 README.md</span></span>
+<span class="line"><span>- 必要时更新 docs/index.md</span></span>
+<span class="line"><span>- 创建 PR</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Verification:</span></span>
+<span class="line"><span>- 新文章路径正确</span></span>
+<span class="line"><span>- sidebar 有入口</span></span>
+<span class="line"><span>- guide index 有入口</span></span>
+<span class="line"><span>- README 链接有效</span></span>
+<span class="line"><span>- 没有改动无关文件</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Stop:</span></span>
+<span class="line"><span>- PR 创建完成</span></span>
+<span class="line"><span>- 或发现分类不确定，需要用户确认</span></span></code></pre></div><p>这类 Loop 的价值非常明显：它把&quot;发布文章&quot;从一次性人工操作，变成可重复执行的工作系统。</p><hr><h2 id="十、loop-engineering-的风险" tabindex="-1">十、Loop Engineering 的风险 <a class="header-anchor" href="#十、loop-engineering-的风险" aria-label="Permalink to &quot;十、Loop Engineering 的风险&quot;">​</a></h2><p>Loop Engineering 越强，风险也越大。</p><h3 id="_10-1-无限循环" tabindex="-1">10.1 无限循环 <a class="header-anchor" href="#_10-1-无限循环" aria-label="Permalink to &quot;10.1 无限循环&quot;">​</a></h3><p>Agent 不断尝试修复问题，但每次都失败。</p><p>缓解方式：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>最大轮数</span></span>
+<span class="line"><span>最大运行时间</span></span>
+<span class="line"><span>最大成本</span></span>
+<span class="line"><span>失败原因去重</span></span>
+<span class="line"><span>连续失败后停止</span></span></code></pre></div><h3 id="_10-2-错误放大" tabindex="-1">10.2 错误放大 <a class="header-anchor" href="#_10-2-错误放大" aria-label="Permalink to &quot;10.2 错误放大&quot;">​</a></h3><p>Agent 第一轮理解错目标，后面每一轮都沿着错误方向优化。</p><p>缓解方式：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>目标复述</span></span>
+<span class="line"><span>关键节点人工确认</span></span>
+<span class="line"><span>每轮输出 diff</span></span>
+<span class="line"><span>高风险变更审批</span></span></code></pre></div><h3 id="_10-3-成本失控" tabindex="-1">10.3 成本失控 <a class="header-anchor" href="#_10-3-成本失控" aria-label="Permalink to &quot;10.3 成本失控&quot;">​</a></h3><p>多个 Agent 互相 review、重试、修复，会消耗大量 token 和工具成本。</p><p>缓解方式：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>run budget</span></span>
+<span class="line"><span>step budget</span></span>
+<span class="line"><span>tool call limit</span></span>
+<span class="line"><span>低成本模型路由</span></span>
+<span class="line"><span>采样 review</span></span>
+<span class="line"><span>成本告警</span></span></code></pre></div><h3 id="_10-4-越权执行" tabindex="-1">10.4 越权执行 <a class="header-anchor" href="#_10-4-越权执行" aria-label="Permalink to &quot;10.4 越权执行&quot;">​</a></h3><p>Agent 为了完成任务调用了不该调用的工具，或修改了不该修改的文件。</p><p>缓解方式：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>工具白名单</span></span>
+<span class="line"><span>目录权限</span></span>
+<span class="line"><span>只读 / 写入 / 高风险动作分级</span></span>
+<span class="line"><span>人工审批</span></span>
+<span class="line"><span>审计日志</span></span></code></pre></div><h3 id="_10-5-形式上通过-实质上失败" tabindex="-1">10.5 形式上通过，实质上失败 <a class="header-anchor" href="#_10-5-形式上通过-实质上失败" aria-label="Permalink to &quot;10.5 形式上通过，实质上失败&quot;">​</a></h3><p>Agent 可能为了让测试通过而绕开真实问题。</p><p>例如：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>删除测试</span></span>
+<span class="line"><span>修改断言</span></span>
+<span class="line"><span>伪造数据</span></span>
+<span class="line"><span>绕开校验</span></span></code></pre></div><p>缓解方式：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>测试变更 review</span></span>
+<span class="line"><span>关键测试只允许人工修改</span></span>
+<span class="line"><span>Review Agent 检查意图一致性</span></span>
+<span class="line"><span>人类最终验收</span></span></code></pre></div><h3 id="_10-6-多-agent-互相强化错误" tabindex="-1">10.6 多 Agent 互相强化错误 <a class="header-anchor" href="#_10-6-多-agent-互相强化错误" aria-label="Permalink to &quot;10.6 多 Agent 互相强化错误&quot;">​</a></h3><p>一个 Agent 提出错误建议，另一个 Agent 基于错误建议继续优化，形成&quot;错误共识&quot;。</p><p>缓解方式：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>独立上下文 review</span></span>
+<span class="line"><span>反方 Agent</span></span>
+<span class="line"><span>随机抽样人工 review</span></span>
+<span class="line"><span>高风险场景要求证据来源</span></span></code></pre></div><hr><h2 id="十一、loop-的评估指标" tabindex="-1">十一、Loop 的评估指标 <a class="header-anchor" href="#十一、loop-的评估指标" aria-label="Permalink to &quot;十一、Loop 的评估指标&quot;">​</a></h2><p>Loop Engineering 需要新的指标，不只是看最终答案。</p><h3 id="_11-1-结果指标" tabindex="-1">11.1 结果指标 <a class="header-anchor" href="#_11-1-结果指标" aria-label="Permalink to &quot;11.1 结果指标&quot;">​</a></h3><table tabindex="0"><thead><tr><th>指标</th><th>说明</th></tr></thead><tbody><tr><td>Task Success Rate</td><td>任务最终完成率</td></tr><tr><td>First Loop Success</td><td>第一轮成功率</td></tr><tr><td>Human Acceptance Rate</td><td>人类接受结果比例</td></tr><tr><td>Rework Rate</td><td>人类返工比例</td></tr><tr><td>Regression Rate</td><td>修复后引入新问题比例</td></tr></tbody></table><h3 id="_11-2-过程指标" tabindex="-1">11.2 过程指标 <a class="header-anchor" href="#_11-2-过程指标" aria-label="Permalink to &quot;11.2 过程指标&quot;">​</a></h3><table tabindex="0"><thead><tr><th>指标</th><th>说明</th></tr></thead><tbody><tr><td>Average Steps per Run</td><td>平均每次循环步骤数</td></tr><tr><td>Retry Count</td><td>平均重试次数</td></tr><tr><td>Verification Coverage</td><td>验证覆盖率</td></tr><tr><td>Recovery Efficiency</td><td>失败后恢复效率</td></tr><tr><td>Abstention Quality</td><td>是否知道何时放弃</td></tr><tr><td>Tool Misuse Rate</td><td>工具误用率</td></tr><tr><td>Context Drift Rate</td><td>上下文偏移率</td></tr></tbody></table><h3 id="_11-3-成本指标" tabindex="-1">11.3 成本指标 <a class="header-anchor" href="#_11-3-成本指标" aria-label="Permalink to &quot;11.3 成本指标&quot;">​</a></h3><table tabindex="0"><thead><tr><th>指标</th><th>说明</th></tr></thead><tbody><tr><td>Cost per Successful Run</td><td>每次成功循环成本</td></tr><tr><td>Token per Step</td><td>每步 token 消耗</td></tr><tr><td>Review Cost Ratio</td><td>review 成本占比</td></tr><tr><td>Wasted Retry Cost</td><td>无效重试成本</td></tr><tr><td>P95 Run Cost</td><td>高成本尾部任务</td></tr></tbody></table><h3 id="_11-4-安全指标" tabindex="-1">11.4 安全指标 <a class="header-anchor" href="#_11-4-安全指标" aria-label="Permalink to &quot;11.4 安全指标&quot;">​</a></h3><table tabindex="0"><thead><tr><th>指标</th><th>说明</th></tr></thead><tbody><tr><td>Approval Hit Rate</td><td>高风险动作进入审批比例</td></tr><tr><td>Unauthorized Action Attempts</td><td>越权尝试次数</td></tr><tr><td>Audit Completeness</td><td>trace 完整率</td></tr><tr><td>Stop Condition Hit Rate</td><td>停止条件触发率</td></tr><tr><td>Incident Rate</td><td>安全事故率</td></tr></tbody></table><hr><h2 id="十二、loop-engineering-对-ai-pm-的意义" tabindex="-1">十二、Loop Engineering 对 AI PM 的意义 <a class="header-anchor" href="#十二、loop-engineering-对-ai-pm-的意义" aria-label="Permalink to &quot;十二、Loop Engineering 对 AI PM 的意义&quot;">​</a></h2><h3 id="_12-1-pm-从-写需求-变成-设计循环" tabindex="-1">12.1 PM 从&quot;写需求&quot;变成&quot;设计循环&quot; <a class="header-anchor" href="#_12-1-pm-从-写需求-变成-设计循环" aria-label="Permalink to &quot;12.1 PM 从&quot;写需求&quot;变成&quot;设计循环&quot;&quot;">​</a></h3><p>传统 PM 主要写：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>需求</span></span>
+<span class="line"><span>流程</span></span>
+<span class="line"><span>页面</span></span>
+<span class="line"><span>验收标准</span></span></code></pre></div><p>AI Agent 时代，PM 还要写：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>触发条件</span></span>
+<span class="line"><span>循环目标</span></span>
+<span class="line"><span>工具权限</span></span>
+<span class="line"><span>验证机制</span></span>
+<span class="line"><span>反馈规则</span></span>
+<span class="line"><span>停止条件</span></span>
+<span class="line"><span>成本边界</span></span>
+<span class="line"><span>人工审批点</span></span></code></pre></div><p>这意味着 PM 的工作从&quot;描述产品功能&quot;升级为&quot;设计 AI 协作系统&quot;。</p><h3 id="_12-2-pm-需要定义什么是-可接受的自动化" tabindex="-1">12.2 PM 需要定义什么是&quot;可接受的自动化&quot; <a class="header-anchor" href="#_12-2-pm-需要定义什么是-可接受的自动化" aria-label="Permalink to &quot;12.2 PM 需要定义什么是&quot;可接受的自动化&quot;&quot;">​</a></h3><p>不是所有事情都应该自动完成。</p><p>PM 要判断：</p><table tabindex="0"><thead><tr><th>问题</th><th>示例</th></tr></thead><tbody><tr><td>哪些任务可以自动跑？</td><td>文档索引更新、测试用例生成</td></tr><tr><td>哪些任务需要人确认？</td><td>改 PRD 范围、提交 PR</td></tr><tr><td>哪些任务不能自动做？</td><td>删除生产数据、发送客户邮件</td></tr><tr><td>哪些结果必须可回滚？</td><td>配置变更、内容发布</td></tr><tr><td>哪些过程必须可审计？</td><td>合规、财务、客户数据访问</td></tr></tbody></table><h3 id="_12-3-pm-的护城河变成-循环设计能力" tabindex="-1">12.3 PM 的护城河变成&quot;循环设计能力&quot; <a class="header-anchor" href="#_12-3-pm-的护城河变成-循环设计能力" aria-label="Permalink to &quot;12.3 PM 的护城河变成&quot;循环设计能力&quot;&quot;">​</a></h3><p>未来，普通使用者会说：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>帮我写个 PRD。</span></span></code></pre></div><p>成熟 AI PM 会说：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>建立一个 PRD Review Loop：</span></span>
+<span class="line"><span>当 PRD 草稿完成时，自动检查目标用户、用户故事、主流程、异常流程、验收标准、AI 评估、成本和风险；</span></span>
+<span class="line"><span>生成缺失项清单；</span></span>
+<span class="line"><span>P0 问题清零前不进入评审；</span></span>
+<span class="line"><span>连续两轮无法修复时要求人工确认。</span></span></code></pre></div><p>这就是差距。</p><hr><h2 id="十三、loop-engineering-与-harness-engineering-的关系" tabindex="-1">十三、Loop Engineering 与 Harness Engineering 的关系 <a class="header-anchor" href="#十三、loop-engineering-与-harness-engineering-的关系" aria-label="Permalink to &quot;十三、Loop Engineering 与 Harness Engineering 的关系&quot;">​</a></h2><p>两者不是替代关系，而是上下层关系。</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Harness Engineering 提供能力</span></span>
+<span class="line"><span>Loop Engineering 组织能力</span></span></code></pre></div><table tabindex="0"><thead><tr><th>Harness 组件</th><th>Loop 中的作用</th></tr></thead><tbody><tr><td>工具层</td><td>支持 Action</td></tr><tr><td>记忆层</td><td>支持 Context 和 Feedback</td></tr><tr><td>上下文管理</td><td>防止 Context Drift</td></tr><tr><td>任务编排</td><td>支持多步骤执行</td></tr><tr><td>验证过滤</td><td>支持 Verification</td></tr><tr><td>自我修正</td><td>支持 Feedback 和 Recovery</td></tr><tr><td>可观测性</td><td>支持 Audit 和 Evaluation</td></tr><tr><td>权限沙箱</td><td>支持 Governance</td></tr></tbody></table><p>可以这样理解：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>没有 Harness，Loop 没有执行能力。</span></span>
+<span class="line"><span>没有 Loop，Harness 只是一堆能力组件。</span></span></code></pre></div><p>Harness 解决&quot;Agent 能不能工作&quot;。<br> Loop 解决&quot;Agent 如何持续正确工作&quot;。</p><hr><h2 id="十四、loop-engineering-的落地路径" tabindex="-1">十四、Loop Engineering 的落地路径 <a class="header-anchor" href="#十四、loop-engineering-的落地路径" aria-label="Permalink to &quot;十四、Loop Engineering 的落地路径&quot;">​</a></h2><h3 id="阶段-1-人工-loop" tabindex="-1">阶段 1：人工 Loop <a class="header-anchor" href="#阶段-1-人工-loop" aria-label="Permalink to &quot;阶段 1：人工 Loop&quot;">​</a></h3><p>人类手动推动每一步：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>PM 发起 → Agent 输出 → PM 检查 → PM 反馈 → Agent 修改</span></span></code></pre></div><p>适合早期验证。</p><h3 id="阶段-2-半自动-loop" tabindex="-1">阶段 2：半自动 Loop <a class="header-anchor" href="#阶段-2-半自动-loop" aria-label="Permalink to &quot;阶段 2：半自动 Loop&quot;">​</a></h3><p>Agent 自动执行低风险步骤，高风险步骤人类确认：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Agent 检查 → Agent 修改草稿 → 人类确认 → Agent 提交</span></span></code></pre></div><p>适合 PRD、文档、测试用例、代码小修。</p><h3 id="阶段-3-自动-loop-人类抽检" tabindex="-1">阶段 3：自动 Loop + 人类抽检 <a class="header-anchor" href="#阶段-3-自动-loop-人类抽检" aria-label="Permalink to &quot;阶段 3：自动 Loop + 人类抽检&quot;">​</a></h3><p>Agent 自动运行，但有预算、权限、trace 和抽检：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>定时触发 → 自动分析 → 自动生成报告 → 高风险升级人工</span></span></code></pre></div><p>适合监控、日报、反馈归因、竞品跟踪。</p><h3 id="阶段-4-多-agent-loop" tabindex="-1">阶段 4：多 Agent Loop <a class="header-anchor" href="#阶段-4-多-agent-loop" aria-label="Permalink to &quot;阶段 4：多 Agent Loop&quot;">​</a></h3><p>多个 Agent 分工协作：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Planner Agent → Executor Agent → Reviewer Agent → Fixer Agent → Human Approver</span></span></code></pre></div><p>适合复杂工程任务、内容生产流水线、Agent 平台。</p><h3 id="阶段-5-组织级-loop" tabindex="-1">阶段 5：组织级 Loop <a class="header-anchor" href="#阶段-5-组织级-loop" aria-label="Permalink to &quot;阶段 5：组织级 Loop&quot;">​</a></h3><p>Loop 成为团队运行机制：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>需求 Loop</span></span>
+<span class="line"><span>研发 Loop</span></span>
+<span class="line"><span>测试 Loop</span></span>
+<span class="line"><span>发布 Loop</span></span>
+<span class="line"><span>反馈 Loop</span></span>
+<span class="line"><span>评估 Loop</span></span>
+<span class="line"><span>治理 Loop</span></span></code></pre></div><p>这时，AI 不再是工具，而是组织流程的一部分。</p><hr><h2 id="十五、产品经理的-loop-设计-checklist" tabindex="-1">十五、产品经理的 Loop 设计 Checklist <a class="header-anchor" href="#十五、产品经理的-loop-设计-checklist" aria-label="Permalink to &quot;十五、产品经理的 Loop 设计 Checklist&quot;">​</a></h2><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>[ ] 这个 Loop 解决的问题明确吗？</span></span>
+<span class="line"><span>[ ] Trigger 是否清晰？</span></span>
+<span class="line"><span>[ ] Goal 是否可验证？</span></span>
+<span class="line"><span>[ ] 输入和上下文是否定义清楚？</span></span>
+<span class="line"><span>[ ] Agent 可以调用哪些工具？</span></span>
+<span class="line"><span>[ ] 工具权限是否分级？</span></span>
+<span class="line"><span>[ ] 每轮结果如何验证？</span></span>
+<span class="line"><span>[ ] 失败后如何反馈和修正？</span></span>
+<span class="line"><span>[ ] 最多执行几轮？</span></span>
+<span class="line"><span>[ ] 成本上限是多少？</span></span>
+<span class="line"><span>[ ] 哪些动作必须人工确认？</span></span>
+<span class="line"><span>[ ] 是否有 trace 和审计？</span></span>
+<span class="line"><span>[ ] 是否可以回滚？</span></span>
+<span class="line"><span>[ ] 是否知道什么时候停止？</span></span>
+<span class="line"><span>[ ] 是否定义了成功指标和失败指标？</span></span></code></pre></div><hr><h2 id="十六、loop-design-prompt-模板" tabindex="-1">十六、Loop Design Prompt 模板 <a class="header-anchor" href="#十六、loop-design-prompt-模板" aria-label="Permalink to &quot;十六、Loop Design Prompt 模板&quot;">​</a></h2><p>产品经理可以直接用下面的 Prompt 设计一个 Loop。</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>你是一位 AI 产品架构师和 Agent Workflow Designer。</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>我想为以下场景设计一个 Agent Loop：</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>场景：</span></span>
+<span class="line"><span>[填写场景]</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>目标用户：</span></span>
+<span class="line"><span>[填写用户]</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>业务目标：</span></span>
+<span class="line"><span>[填写目标]</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>约束条件：</span></span>
+<span class="line"><span>[时间 / 成本 / 权限 / 工具 / 风险]</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>请帮我设计 Loop Engineering 方案，包含：</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>1. Loop 名称</span></span>
+<span class="line"><span>2. Trigger 触发条件</span></span>
+<span class="line"><span>3. Goal 本轮目标</span></span>
+<span class="line"><span>4. 输入材料</span></span>
+<span class="line"><span>5. 上下文加载策略</span></span>
+<span class="line"><span>6. Agent 可用工具</span></span>
+<span class="line"><span>7. 工具权限分级</span></span>
+<span class="line"><span>8. 执行动作序列</span></span>
+<span class="line"><span>9. 验证机制</span></span>
+<span class="line"><span>10. 反馈和重试规则</span></span>
+<span class="line"><span>11. 停止条件</span></span>
+<span class="line"><span>12. 成本预算</span></span>
+<span class="line"><span>13. 人工审批点</span></span>
+<span class="line"><span>14. 风险清单</span></span>
+<span class="line"><span>15. 评估指标</span></span>
+<span class="line"><span>16. 最小可行版本</span></span>
+<span class="line"><span>17. 后续升级路径</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>要求：</span></span>
+<span class="line"><span>- 用表格输出</span></span>
+<span class="line"><span>- 不要假设完全自动化</span></span>
+<span class="line"><span>- 高风险动作必须有人类确认</span></span>
+<span class="line"><span>- 明确说明哪些事情不应该交给 Agent 做</span></span></code></pre></div><hr><h2 id="十七、一个完整样例-ai-pm-playbook-文档发布-loop" tabindex="-1">十七、一个完整样例：AI PM Playbook 文档发布 Loop <a class="header-anchor" href="#十七、一个完整样例-ai-pm-playbook-文档发布-loop" aria-label="Permalink to &quot;十七、一个完整样例：AI PM Playbook 文档发布 Loop&quot;">​</a></h2><div class="language-markdown vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">markdown</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;"># Loop Name</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">AI PM Playbook Documentation Release Loop</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;">## Trigger</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">用户提供一篇新文章，或要求新增一个研究主题。</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;">## Goal</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">将文章发布为 AI PM Playbook 中可导航、可检索、可维护的正式文档。</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;">## Inputs</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 文章正文</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 文章标题</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 推荐分类</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 目标读者</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 是否需要首页推荐</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 是否需要 README 入口</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;">## Context Policy</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">Agent 应读取：</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> docs/.vitepress/config.ts</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> docs/guide/index.md</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> docs/index.md</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> README.md</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 同目录下相似文章</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;">## Tools and Permissions</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">| 工具 | 权限 |</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">|------|------|</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">| 读取仓库文件 | 允许 |</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">| 新建 Markdown 文件 | 允许 |</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">| 更新 sidebar | 允许 |</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">| 更新 index | 允许 |</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">| 更新 README | 需判断是否重要 |</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">| 删除文件 | 禁止 |</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">| 修改无关文档 | 禁止 |</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">| 创建 PR | 允许 |</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">| 直接 merge | 需人工确认 |</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;">## Action Steps</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">1.</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 判断文章所属目录。</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">2.</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 生成文件名。</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">3.</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 新增 Markdown 文件。</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">4.</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 更新 VitePress sidebar。</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">5.</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 更新 docs/guide/index.md。</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">6.</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 必要时更新 README.md。</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">7.</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 必要时更新 docs/index.md。</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">8.</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 检查内部链接。</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">9.</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 创建 PR。</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;">## Verification</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 新文章路径正确；</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> sidebar 有入口；</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> guide index 有入口；</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> README 链接使用 </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">\`.md\`</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">；</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> VitePress link 不带 </span><span style="--shiki-light:#005CC5;--shiki-dark:#79B8FF;">\`.md\`</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">；</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> PR diff 只包含相关文件；</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 没有删除旧内容；</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 没有无来源的最新事实。</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;">## Feedback Rules</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 如果分类不确定，先给出建议并请求人工确认；</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 如果链接不确定，标记为待确认；</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 如果涉及最新价格、法规、模型能力，必须查官方来源；</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 如果构建无法运行，在 PR 说明中标注。</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;">## Stop Conditions</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> PR 创建完成；</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 或发现文章内容缺失严重；</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 或需要用户决定分类；</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 或发生权限 / 构建 / merge 冲突。</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;">## Budget</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 单次任务最多 5 个文件变更；</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 超出范围需要说明原因；</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 不做大规模重构。</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#005CC5;--shiki-light-font-weight:bold;--shiki-dark:#79B8FF;--shiki-dark-font-weight:bold;">## Human Approval</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">以下动作必须人工确认：</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 删除文章；</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 修改目录结构；</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 首页强推荐；</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 合并 PR；</span></span>
+<span class="line"><span style="--shiki-light:#E36209;--shiki-dark:#FFAB70;">-</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> 改仓库发布流程。</span></span></code></pre></div><hr><h2 id="十八、未来趋势-从-agent-loop-到-organization-loop" tabindex="-1">十八、未来趋势：从 Agent Loop 到 Organization Loop <a class="header-anchor" href="#十八、未来趋势-从-agent-loop-到-organization-loop" aria-label="Permalink to &quot;十八、未来趋势：从 Agent Loop 到 Organization Loop&quot;">​</a></h2><p>Loop Engineering 不会只停留在 coding agent。</p><p>未来 AI 产品和组织会出现更多 Loop：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Product Discovery Loop</span></span>
+<span class="line"><span>User Research Loop</span></span>
+<span class="line"><span>PRD Review Loop</span></span>
+<span class="line"><span>Design QA Loop</span></span>
+<span class="line"><span>Code Review Loop</span></span>
+<span class="line"><span>Release Loop</span></span>
+<span class="line"><span>Customer Feedback Loop</span></span>
+<span class="line"><span>Compliance Review Loop</span></span>
+<span class="line"><span>Model Evaluation Loop</span></span>
+<span class="line"><span>Cost Optimization Loop</span></span></code></pre></div><p>这些 Loop 会共同组成一个 AI-native 产品组织。</p><p>那时，产品经理的关键能力不是&quot;会不会使用某个 AI 工具&quot;，而是：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>能不能把复杂工作拆成可触发、可执行、可验证、可反馈、可停止的循环系统。</span></span></code></pre></div><p>这就是 Loop Engineering 对 AI PM 的长期价值。</p><hr><h2 id="结语" tabindex="-1">结语 <a class="header-anchor" href="#结语" aria-label="Permalink to &quot;结语&quot;">​</a></h2><p>Prompt Engineering 让我们学会了如何和模型对话。<br> Context Engineering 让我们学会了如何给模型信息。<br> Harness Engineering 让我们学会了如何给 Agent 运行环境。<br> Loop Engineering 则要求我们进一步思考：</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>Agent 如何持续推进任务？</span></span>
+<span class="line"><span>如何检查自己？</span></span>
+<span class="line"><span>如何吸收反馈？</span></span>
+<span class="line"><span>如何避免越跑越偏？</span></span>
+<span class="line"><span>如何知道什么时候停？</span></span></code></pre></div><p>对 AI PM 来说，Loop Engineering 不是一个工程热词，而是一种新的产品设计语言。</p><p>它把 PM 熟悉的目标、流程、验收、反馈、成本、风险和责任边界，转化成 Agent 可以持续执行的系统。</p><p>一句话总结：</p><blockquote><p><strong>未来优秀的 AI PM，不只是会写 Prompt，而是会设计 Loop。</strong></p></blockquote><hr><h2 id="参考来源" tabindex="-1">参考来源 <a class="header-anchor" href="#参考来源" aria-label="Permalink to &quot;参考来源&quot;">​</a></h2><ul><li><p>Business Insider：Forget prompt engineering: &#39;Loop engineering&#39; is all the rage now<br><a href="https://www.businessinsider.com/what-are-loops-ai-engineering-tips-2026-6" target="_blank" rel="noreferrer">https://www.businessinsider.com/what-are-loops-ai-engineering-tips-2026-6</a></p></li><li><p>RigorBench: Benchmarking Engineering Process Discipline in Autonomous AI Coding Agents<br><a href="https://arxiv.org/abs/2606.22678" target="_blank" rel="noreferrer">https://arxiv.org/abs/2606.22678</a></p></li><li><p>Dive into Claude Code: The Design Space of Today&#39;s and Future AI Agent Systems<br><a href="https://arxiv.org/abs/2604.14228" target="_blank" rel="noreferrer">https://arxiv.org/abs/2604.14228</a></p></li><li><p>CODE-GEN: A Human-in-the-Loop RAG-Based Agentic AI System for Multiple-Choice Question Generation<br><a href="https://arxiv.org/abs/2604.03926" target="_blank" rel="noreferrer">https://arxiv.org/abs/2604.03926</a></p></li><li><p>AI PM Playbook：Harness Engineering：AI Agent 时代的新工程范式<br><a href="https://prodthinkpm.github.io/ai-pm-playbook/guide/research/harness-engineering-introduction.html" target="_blank" rel="noreferrer">https://prodthinkpm.github.io/ai-pm-playbook/guide/research/harness-engineering-introduction.html</a></p></li><li><p>Anthropic：Building effective agents<br><a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noreferrer">https://www.anthropic.com/engineering/building-effective-agents</a></p></li><li><p>Model Context Protocol<br><a href="https://modelcontextprotocol.io/" target="_blank" rel="noreferrer">https://modelcontextprotocol.io/</a></p></li><li><p>OWASP Top 10 for LLM Applications<br><a href="https://genai.owasp.org/" target="_blank" rel="noreferrer">https://genai.owasp.org/</a></p></li></ul>`,267)])])}const k=a(e,[["render",i]]);export{g as __pageData,k as default};
